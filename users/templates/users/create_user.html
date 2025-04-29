@@ -1,0 +1,49 @@
+{% block content %}
+<!-- <div class="page-register"> -->
+<section>
+
+    <form method="post">
+        <h1>Реєстрація</h1>
+        {% csrf_token %}
+        </div>
+        <div class="inputbox">
+            <ion-icon name="person-outline"></ion-icon>
+            {{ form.username }}
+            <label for="id_username">Юзернейм</label>
+        </div>
+        <div class="inputbox password-container">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            {{ form.password1 }}
+            <label for="id_password1">Пароль</label>
+            <span class="toggle-password" data-target="id_password1">
+                <i class="fas fa-eye"></i>
+            </span>
+        </div>
+        <div class="inputbox password-container">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            {{ form.password2 }}
+            <label for="id_password2">Повторіть пароль</label>
+            <span class="toggle-password" data-target="id_password2">
+                <i class="fas fa-eye"></i>
+            </span>
+        </div>
+        <button type="submit" class="btn btn-my m-3">Реєстрація</button>
+        <div class="register">
+            <p>Є акаунт? <a href="{% url 'users:login' %}">Увійти</a></p>
+        </div>
+    </form>
+</section>
+{% if form.errors %}
+    <ul class="error-list">
+        {% for field in form %}
+            {% for error in field.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+{% endif %}
+<!-- </div> -->
+    
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% endblock %}

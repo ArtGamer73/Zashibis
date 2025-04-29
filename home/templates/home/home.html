@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My First Blog</title>
+</head>
+<body>
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+        <div class="col-md-3 mb-2 mb-md-0">
+        </div>
+
+        <div class="col-md-3 text-end">
+          {% if request.session.username %}
+              <a class="navbar-brand mb-2" href="{% url 'users:account' %}">{{ request.session.username }}</a>
+              <a href="{% url 'users:logout' %}" class="btn btn-danger">Вийти</a>
+          {% else %}
+              <a href="{% url 'users:login' %}" class="btn btn-outline-my me-2">Увійти</a>
+          {% endif %}
+        </div>
+    </header>
+
+    <main>
+        <div class="container text-center">
+            <h1>Ласкаво просимо до My First Blog!</h1>
+            <a href="{% url 'articles:create_article' %}" class="btn btn-primary mt-4">Створити статтю</a>
+        </div>
+    </main>
+</body>
+</html>
