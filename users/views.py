@@ -84,7 +84,7 @@ def create_user(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')  # Направляє на сторінку входу після створення користувача
+            return redirect('users:login')  # Направляє на сторінку входу після створення користувача
     else:
         form = UserCreationForm()
     return render(request, 'users/create_user.html', {'form': form, 'create_user': True})
@@ -93,12 +93,12 @@ def request_login(request):
     if request.method == 'POST':
         form = EmailPasswordForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
+            username = form.cleaned_data['username']
             password = form.cleaned_data['password']
 
             # Перевірка користувача
             try:
-                admin = User.objects.get(email=email)
+                admin = User.objects.get(username=username)
                 if admin.check_password(password):
                     login(request, admin)
                     request.session['username'] = admin.username

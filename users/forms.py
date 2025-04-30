@@ -38,12 +38,8 @@ class UserForm(UserCreationForm):
         }
 
 class EmailPasswordForm(Form):
-    email = EmailField(
-        label="Електронна пошта", 
-        widget=EmailInput(attrs={
-            'class': 'form-control email',
-            'placeholder': 'Ваша пошта',
-        })
+    username = CharField(
+        label="Loogin"
     )
     password = CharField(
         widget=PasswordInput(attrs={
