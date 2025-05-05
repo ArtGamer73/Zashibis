@@ -37,6 +37,7 @@ class ProfileUpdateView(UpdateView):
         response = super().form_valid(form)
         messages.success(self.request, "Ваш профіль успішно оновлено")
         return response
+    
 
 def logout_view(request):
     logout(request)
@@ -102,18 +103,7 @@ def request_login(request):
                 if admin.check_password(password):
                     login(request, admin)
                     request.session['username'] = admin.username
-                    subject = admin.username
-                    message = f'Вітаємо, {subject}. Ви успішно увійшли в свій акаунт! Ми раді вас бачити'
-                    from_email = core.settings.EMAIL_HOST_USER
-                    to_email = admin.email
-                    send_mail(
-                        subject,
-                        message,
-                        from_email, 
-                        [to_email],
-                        fail_silently=False
-                    )
-                    return redirect('home')
+                    return redirect('articles:articles')
                 else:
                     messages.error(request, 'Невірний пароль!')
                     return redirect('users:login')

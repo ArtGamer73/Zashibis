@@ -4,30 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My First Blog</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #2e2e2e; 
+        }
+        .custom-navbar {
+            background-color: #ff9100 !important; /* Темний фон */
+            width: 100%;
+            position: fixed;
+            margin-top: auto;
+        }
+        .button-container {
+            margin-left: auto; /* Переміщення блоку кнопок вправо */
+        }
+        .sidebar {
+            width: 10%;
+            background-color: #000000;
+            position: fixed;
+            top: 56px; /* висота navbar */
+            bottom: 0;
+            left: 0;
+            padding-top: 1rem;
+        }
+        .sidebar a {
+            display: block;
+            color: rgb(255, 255, 255);
+            padding: 10% 20%;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            background-color: #333;
+        }
+        .main-content {
+            margin-left: 10%;
+            padding: 2rem
+      }
+        .container{
+            display: flex;
+        }
+    </style>
 </head>
 <body>
-    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
-        <div class="col-md-3 mb-2 mb-md-0">
-        </div>
+    <nav class="navbar navbar-expand-lg custom-navbar">
+        <h2>YouBlog</h2>
 
-        <div class="col-md-3 text-end">
-          {% if request.session.username %}
-              <a class="navbar-brand mb-2" href="{% url 'users:account' %}">{{ request.session.username }}</a>
-              <a href="{% url 'users:logout' %}" class="btn btn-danger">Вийти</a>
-          {% else %}
-              <a href="{% url 'users:login' %}" class="btn btn-outline-my me-2">Увійти</a>
-          {% endif %}
+        <div class="container d-flex">
+            
         </div>
-    </header>
+    </nav>
+<div class="container">
+    <div class="sidebar">
+
+        {% if request.session.username %}
+            <a class="btn btn-secondary mx-1" href="{% url 'users:account' %}">{{ request.session.username }}</a>
+            <a href="{% url 'users:logout' %}" type="submit">Exit</a>
+        {% else %}
+            <a href="{% url 'users:login' %}" >Sign in</a>
+        {% endif %}
+        <a href="#">Subscriptions</a>
+        <a href="#">My articles</a>
+        <a href="#">Settings</a>
+        
+    </div>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</div>
 
     
-    <main>
-        <div class="container text-center">
-            <h1>Ласкаво просимо до My First Blog!</h1>
-            <a href="{% url 'articles:create_article' %}" class="btn btn-primary mt-4">Створити статтю</a>
-        </div>
-    </main>
+
 </body>
 </html>
+
 
 

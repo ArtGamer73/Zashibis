@@ -1,22 +1,85 @@
-<div class="dropdown-menu">
-    <form class="px-4 py-3">
-      <div class="mb-3">
-        <label for="exampleDropdownFormEmail1" class="form-label">Email address</label>
-        <input type="username" class="form-control" id="exampleDropdownFormEmail1">
-      </div>
-      <div class="mb-3">
-        <label for="exampleDropdownFormPassword1" class="form-label">Password</label>
-        <input type="password" class="form-control" id="exampleDropdownFormPassword1" placeholder="Password">
-      </div>
-      <div class="mb-3">
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="dropdownCheck">
-          <label class="form-check-label" for="dropdownCheck">
-            Remember me
-          </label>
-        </div>
-      </div>
+
+<head>
+
+<style>
+  body {
+    background-color: #2e2e2e;
+  }
+  .sign_container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    padding: 10%;
+    background-color: #ff7b00;
+    border-radius: 20px;
+  }
+  .custom-navbar {
+    background-color: #ff9100 !important;
+    width: 100%;
+  }
+    .sidebar {
+      width: 10%;
+      background-color: #000000;
+      position: fixed;
+      top: 56px; /* висота navbar */
+      bottom: 0;
+      left: 0;
+      padding-top: 1rem;
+  }
+  .sidebar a {
+      display: block;
+      color: rgb(255, 255, 255);
+      padding: 10% 20%;
+      text-decoration: none;
+  }
+  .sidebar a:hover {
+      background-color: #333;
+  }
+  .main-content {
+      margin-left: 10%;
+      padding: 2rem
+}
+</style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <a href="#">Subscriptions</a>
+    <a href="#">My articles</a>
+    <a href="#">Settings</a>
+</div>
+
+
+<nav class="navbar navbar-expand-lg custom-navbar">
+  <a href="{% url 'home:home' %}" style="text-decoration: none; color: inherit;">
+    <h2>YouBlog</h2>
+  </a>
+  <div class="container d-flex">
+  </div>
+</nav>
+
+<div class="sign_container"> 
+  <div class="dropdown-menu mb-3">
+    <form class="px-4 py-3" method="post">
+      {% csrf_token %}
+      <div class="inputbox">
+        <ion-icon name="mail-outline"></ion-icon>
+        {{ form.username }}
+        <label>Username:</label>
+    </div>
+    <div class="inputbox password-container mb-3">
+        <ion-icon name="lock-closed-outline"></ion-icon>
+        {{ form.password }}
+        <label for="id_password">Password:</label><br>
+        <span class="toggle-password" data-target="id_password">
+            <i class="fas fa-eye"></i>
+        </span>
+    </div>
       <button type="submit" class="btn btn-primary">Sign in</button>
     </form>
     <div class="dropdown-divider"></div>
     <a class="dropdown-item" href="{% url 'users:create_user' %}">New around here? Sign up</a>
+</div>
+</body>

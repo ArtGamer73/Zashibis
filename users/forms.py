@@ -1,23 +1,14 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group
-from django.forms import Form, EmailField, EmailInput, CharField, PasswordInput, TextInput, ChoiceField, ModelChoiceField, Select
+from django.forms import Form, EmailInput, CharField, PasswordInput, TextInput, ChoiceField, ModelChoiceField, Select
 from django.contrib.auth.models import User
 
 class UserForm(UserCreationForm):
     password1 = CharField(
-        label="Пароль",
+        label="Password",
         widget=PasswordInput(attrs={
             'class': 'form-control email',
             'placeholder': 'Придумайте пароль',
-            'id': 'id_password1',
-            'data-toggle': 'password',
-        })
-    )
-    password2 = CharField(
-        label="Повторіть пароль",
-        widget=PasswordInput(attrs={
-            'class': 'form-control email',
-            'placeholder': 'Повторіть пароль',
             'id': 'id_password1',
             'data-toggle': 'password',
         })
@@ -29,35 +20,24 @@ class UserForm(UserCreationForm):
         widgets = {
             "username": TextInput(attrs={
                 'class': 'form-control email',
-                'placeholder': 'Імя користувача',
-            }),
-            "email": EmailInput(attrs={
-                'class': 'form-control email',
-                'placeholder': 'Ваша пошта',
+                'placeholder': 'Name',
             }),
         }
 
 class EmailPasswordForm(Form):
     username = CharField(
-        label="Loogin"
+        label="Username", 
+        widget=TextInput(attrs={
+            'class': 'form-control email',
+            'placeholder': 'User',
+        }),
     )
     password = CharField(
         widget=PasswordInput(attrs={
             'class': 'form-control email',
-            'placeholder': 'Пароль',
+            'placeholder': 'Passw0rd',
             'id': 'id_password',
             'data-target': 'id_password'
         }),
-        label="Пароль"
-    )
-
-    user = ModelChoiceField(
-        queryset= User.objects.all(), 
-        label="Оберіть користувача",
-        widget=Select(attrs={'class': 'form-select'})
-    )
-    group = ModelChoiceField(
-        queryset=Group.objects.all(), 
-        label="Оберіть групу",
-        widget=Select(attrs={'class': 'form-select'})
+        label="Password"
     )

@@ -9,12 +9,12 @@ from django.contrib.auth.decorators import login_required
 # Відображення списку статей
 def article_list(request):
     articles = Article.objects.all().order_by('-published_date')
-    return render(request, 'articles/article_list.html', {'articles': articles})
+    return render(request, 'articles/articles_list.html', {'articles': articles})
 
 # Перегляд статті
 def article_detail(request, pk):
     article = get_object_or_404(Article, pk=pk)
-    return render(request, 'articles/article_detail.html', {'article': article})
+    return render(request, 'articles/articles_detail.html', {'article': article})
 
 # Створення нової статті
 def create_article(request):

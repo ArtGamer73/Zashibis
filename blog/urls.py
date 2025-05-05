@@ -20,9 +20,9 @@ from home import views as home_views  # Імпортуємо views з home дл�
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home_views.home, name='home'),  # ← це головна сторінка
+    #path('', home_views.home, name='home'),  # ← це головна сторінка
     path('home/', include('home.urls')),
-    path('articles/', include('articles.urls')),
+    path('', include('articles.urls')),
     path('users/', include('users.urls')),
 
 ]

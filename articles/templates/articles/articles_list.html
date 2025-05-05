@@ -1,15 +1,15 @@
-{% extends "home.html" %}
+{% extends "home/home.html" %}
 
 {% block content %}
   <h1>Статті</h1>
   <ul>
     {% for article in articles %}
       <li>
-        <h2><a href="{% url 'article_detail' article.pk %}">{{ article.title }}</a></h2>
+        <h2><a href="{% url 'articles:article_detail' article.pk %}">{{ article.title }}</a></h2>
         <p>{{ article.published_date }}</p>
         <p>{{ article.content|truncatewords:30 }}</p>
       </li>
     {% endfor %}
   </ul>
-  <a href="{% url 'create_article' %}">Створити нову статтю</a>
+  <a href="{% url 'articles:create_article' %}">Створити нову статтю</a>
 {% endblock %}
