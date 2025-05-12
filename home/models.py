@@ -12,8 +12,8 @@ class Article(models.Model):
     
     # Вибір статусу статті
     STATUS_CHOICES = [
-        ('draft', 'Чернетка'),
-        ('published', 'Опублікована'),
+        ('draft', 'The draft'),
+        ('published', 'Published'),
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')  # Статус статті
 

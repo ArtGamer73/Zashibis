@@ -1,15 +1,209 @@
 {% extends "home/home.html" %}
 
 {% block content %}
-  <h1>Статті</h1>
-  <ul>
+
+<style>
+  .article-container {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    flex-direction: column; 
+  }
+
+  .article-card {
+    width: 90%; /* Ширина картки повернута до 90% */
+    max-width: 900px; /* Максимальна ширина */
+    min-height: 200px; 
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 15px;
+    margin-bottom: 20px;
+    position: relative;
+    border: 1px solid #ddd; /* Додано рамку */
+    border-radius: 10px; /* Округлені кути */
+    background-color: #fff; /* Білий фон */
+  }
+
+  .article-card .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .article-card .card-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .article-card:hover {
+    transform: scale(1.02); /* Slight zoom on hover */
+    transition: transform 0.2s ease-in-out;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тінь при наведенні */
+  }
+
+  .delete-icon {
+    position: absolute;
+    top: 10px; /* Розташовано у верхньому правому куті */
+    right: 10px;
+    background-color: transparent; /* Прозорий фон */
+    border: none;
+    color: #dc3545; /* Червоний колір для іконки */
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  .delete-icon:hover {
+    color: #a71d2a; /* Темніший червоний при наведенні */
+  }
+
+  .image-preview {
+    display: block;
+    margin: 20px auto; /* Центрування зображення */
+    max-width: 100%;
+    height: auto; /* Автоматична висота для збереження пропорцій */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer; /* Курсор для клікабельності */
+  }
+
+  .like-icon {
+    font-size: 1.5rem;
+    color: #6c757d; /* Сірий колір за замовчуванням */
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .like-icon.liked {
+    color: #007bff; /* Синій колір для лайкнутої іконки */
+  }
+
+  .like-icon:hover {
+    color: #0056b3; /* Темніший синій при наведенні */
+  }
+
+  .comment-section {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd; /* Лінія над секцією коментарів */
+  }
+
+  .comment-section ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .comment-section li {
+    margin-bottom: 10px;
+  }
+
+  .comment-section input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+
+  .comment-section button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .comment-section button:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+<div class="container mt-5">  
+  <div class="row justify-content-center">
     {% for article in articles %}
-      <li>
-        <h2><a href="{% url 'articles:article_detail' article.pk %}">{{ article.title }}</a></h2>
-        <p>{{ article.published_date }}</p>
-        <p>{{ article.content|truncatewords:30 }}</p>
-      </li>
+      <div class="col-12 article-container mb-4">
+        <div class="card shadow-lg article-card">
+          {% if user.is_authenticated %}
+            <form action="{% url 'articles:delete_article' article.id %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="delete-icon">
+                <ion-icon name="trash-outline"></ion-icon>
+              </button>
+            </form>
+          {% endif %}
+          {% if article.image %}
+              <img src="{{ article.image.url }}" alt="{{ article.title }}" class="image-preview" onclick="openModal('{{ article.image.url }}')">
+          {% endif %}
+          <div class="card-body">
+            <h3 class="card-title">{{ article.title }}</h3>
+            <h6 class="card-subtitle mb-2 text-muted">{{ article.published_date|date:"d M Y" }}</h6>
+            <p class="card-text">{{ article.content }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              {% if user.is_authenticated %}
+                <a href="{% url 'articles:edit_article' article.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <form action="{% url 'articles:like_article' article.id %}" method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="like-icon {% if user in article.likes.all %}liked{% endif %}">
+                    <ion-icon name="heart"></ion-icon>
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+            <!-- Коментарі -->
+            <div class="comment-section">
+              <h6>Comments</h6>
+              <ul>
+                {% for comment in article.comments.all %}
+                  <li>
+                    <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
+                    <small class="text-muted">{{ comment.created_at|date:"d M Y H:i" }}</small>
+                  </li>
+                {% empty %}
+                  <li>No comments yet.</li>
+                {% endfor %}
+              </ul>
+              {% if user.is_authenticated %}
+                <form method="post" action="{% url 'articles:add_comment' article.id %}">
+                  {% csrf_token %}
+                  <input type="text" name="content" placeholder="Write a comment...">
+                  <button type="submit">Add Comment</button>
+                </form>
+              {% else %}
+                <p>You must be logged in to add a comment.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <p class="text-center text-muted">No articles available.</p>
+      </div>
     {% endfor %}
-  </ul>
-  <a href="{% url 'articles:create_article' %}">Створити нову статтю</a>
+  </div>
+</div>
+
+<!-- Модальне вікно -->
+<div id="imageModal" class="modal">
+    <button class="close-btn" onclick="closeModal()">×</button>
+    <img id="modalImage" src="#" alt="Full Image">
+</div>
+
+<script>
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+
+    function openModal(imageUrl) {
+        modalImage.src = imageUrl;
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+</script>
+
 {% endblock %}

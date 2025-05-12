@@ -1,5 +1,6 @@
+{% extends "home/home.html" %}
 
-<head>
+{% block content %}
 
 <style>
   body {
@@ -11,75 +12,100 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 40%;
-    padding: 10%;
+    padding: 2rem;
     background-color: #ff7b00;
     border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
-  .custom-navbar {
-    background-color: #ff9100 !important;
-    width: 100%;
-  }
-    .sidebar {
-      width: 10%;
-      background-color: #000000;
-      position: fixed;
-      top: 56px; /* висота navbar */
-      bottom: 0;
-      left: 0;
-      padding-top: 1rem;
+  .sidebar {
+    width: 10%;
+    background-color: #000000;
+    position: fixed;
+    top: 5%; 
+    bottom: 0;
+    left: 0;
+    padding-top: 1rem;
   }
   .sidebar a {
-      display: block;
-      color: rgb(255, 255, 255);
-      padding: 10% 20%;
-      text-decoration: none;
+    display: block;
+    color: rgb(255, 255, 255);
+    padding: 10% 20%;
+    text-decoration: none;
   }
   .sidebar a:hover {
-      background-color: #333;
+    background-color: #333;
   }
   .main-content {
-      margin-left: 10%;
-      padding: 2rem
-}
+    margin-left: 10%;
+    padding: 2rem;
+  }
+  .inputbox {
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  .inputbox ion-icon {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    color: #333;
+  }
+  .inputbox input {
+    width: 100%;
+    padding: 10px 10px 10px 40px;
+    border: 1px solid #ffffff;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+  .inputbox label {
+    display: block;
+    margin-top: 5px;
+    font-weight: bold;
+    color: #fff;
+  }
+  .btn-primary {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+  .dropdown-divider {
+    margin: 1.5rem 0;
+    border-top: 1px solid #ccc;
+  }
 </style>
-</head>
-<body>
 
-  <div class="sidebar">
-    <a href="#">Subscriptions</a>
-    <a href="#">My articles</a>
-    <a href="#">Settings</a>
+<div class="sidebar">
+  <a href="#">Subscriptions</a>
+  <a href="#">My articles</a>
+  <a href="#">Settings</a>
 </div>
-
-
-<nav class="navbar navbar-expand-lg custom-navbar">
-  <a href="{% url 'home:home' %}" style="text-decoration: none; color: inherit;">
-    <h2>YouBlog</h2>
-  </a>
-  <div class="container d-flex">
-  </div>
-</nav>
 
 <div class="sign_container"> 
-  <div class="dropdown-menu mb-3">
-    <form class="px-4 py-3" method="post">
-      {% csrf_token %}
-      <div class="inputbox">
-        <ion-icon name="mail-outline"></ion-icon>
-        {{ form.username }}
-        <label>Username:</label>
+  <form method="post">
+    {% csrf_token %}
+    <div class="inputbox">
+      <label for="id_username">Username:</label>
+      <ion-icon name="person-outline"></ion-icon>
+      {{ form.username }}
     </div>
-    <div class="inputbox password-container mb-3">
-        <ion-icon name="lock-closed-outline"></ion-icon>
-        {{ form.password }}
-        <label for="id_password">Password:</label><br>
-        <span class="toggle-password" data-target="id_password">
-            <i class="fas fa-eye"></i>
-        </span>
+    <div class="inputbox password-container">
+      <label for="id_password">Password:</label>
+      <ion-icon name="lock-closed-outline"></ion-icon>
+      {{ form.password }}
     </div>
-      <button type="submit" class="btn btn-primary">Sign in</button>
-    </form>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="{% url 'users:create_user' %}">New around here? Sign up</a>
+    <button type="submit" class="btn btn-primary">Sign in</button>
+  </form>
+  <div class="dropdown-divider"></div>
+  <a class="dropdown-item" href="{% url 'users:create_user' %}">New around here? Sign up</a>
 </div>
-</body>
+
+{% endblock %}

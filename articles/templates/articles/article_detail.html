@@ -1,0 +1,43 @@
+{% extends "home/home.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <!-- Заголовок статті -->
+  <h1>{{ article.title }}</h1>
+  
+  <!-- Контент статті -->
+  <p>{{ article.content }}</p>
+  
+  <!-- Дата публікації -->
+  <p class="text-muted">Published: {{ article.published_date|date:"d M Y" }}</p>
+  
+  <!-- Кнопка повернення до списку статей -->
+  <a href="{% url 'articles:article_list' %}" class="btn btn-secondary">Back to list</a>
+
+  <!-- Секція коментарів -->
+  <div class="comment-section mt-5">
+    <h5>Comments</h5>
+    <ul>
+      {% for comment in article.comments.all %}
+        <li>
+          <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
+          <small class="text-muted">{{ comment.created_at|date:"d M Y H:i" }}</small>
+        </li>
+      {% empty %}
+        <li>No comments yet.</li>
+      {% endfor %}
+    </ul>
+    
+    <!-- Форма для додавання коментарів -->
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'articles:add_comment' article.id %}">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button type="submit" class="btn btn-primary">Add Comment</button>
+      </form>
+    {% else %}
+      <p>You must be logged in to add a comment.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

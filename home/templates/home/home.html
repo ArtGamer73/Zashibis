@@ -5,24 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My First Blog</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <style>
+        
+        .main-content {
+            margin-top: 1%;
+        }
         body {
             background-color: #2e2e2e; 
         }
         .custom-navbar {
-            background-color: #ff9100 !important; /* Темний фон */
+            background-color: #ff9100 !important;
             width: 100%;
+            height: 5%;
             position: fixed;
-            margin-top: auto;
+            margin-top: 0;
+            z-index: 1000;
         }
         .button-container {
-            margin-left: auto; /* Переміщення блоку кнопок вправо */
+            margin-left: auto; 
         }
         .sidebar {
             width: 10%;
             background-color: #000000;
             position: fixed;
-            top: 56px; /* висота navbar */
+            top: 5%;
             bottom: 0;
             left: 0;
             padding-top: 1rem;
@@ -43,40 +51,78 @@
         .container{
             display: flex;
         }
+
+        .navbar-brand {
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+        }
+        .navbar-brand:hover {
+            color: black;
+            text-decoration: none;
+        }
+            
+        .floating-btn {
+            position: fixed;
+            bottom: 3%;
+            right: 2%;
+            width: 80px;
+            height: 80px;
+            background-color: #e27900;
+            color: rgb(0, 0, 0);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 48px; 
+            font-weight: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+        }
+        .floating-btn:hover {
+            background-color: #d26900;
+            color: white;
+            text-decoration: none;
+        }
+        
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg custom-navbar">
-        <h2>YouBlog</h2>
+        <a href="/" class="navbar-brand">
+            <h2>YouBlog</h2>
+        </a>
 
         <div class="container d-flex">
             
         </div>
     </nav>
-<div class="container">
-    <div class="sidebar">
+<div>
+    <div class="container">
+        <div class="sidebar">
 
-        {% if request.session.username %}
-            <a class="btn btn-secondary mx-1" href="{% url 'users:account' %}">{{ request.session.username }}</a>
-            <a href="{% url 'users:logout' %}" type="submit">Exit</a>
-        {% else %}
-            <a href="{% url 'users:login' %}" >Sign in</a>
+            {% if request.session.username %}
+                <a class="btn btn-secondary mx-1" href="{% url 'users:account' %}">{{ request.session.username }}</a>
+                <a href="{% url 'users:logout' %}" type="submit">Exit</a>
+            {% else %}
+                <a href="{% url 'users:login' %}" >Sign in</a>
+            {% endif %}
+            <a href="#">Subscriptions</a>
+            <a href="#">My articles</a>
+            <a href="#">Settings</a>
+            
+        </div>
+        <main class="main-content">
+            {% block content %}
+            {% endblock %}
+        </main>
+        {% if user.is_authenticated %}
+        <a href="{% url 'articles:create_article' %}" class="floating-btn">+</a>
         {% endif %}
-        <a href="#">Subscriptions</a>
-        <a href="#">My articles</a>
-        <a href="#">Settings</a>
-        
     </div>
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
 </div>
 
     
 
 </body>
 </html>
-
-
-

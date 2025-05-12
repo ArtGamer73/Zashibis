@@ -1,11 +1,206 @@
+{% extends "home/home.html" %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2>Створити статтю</h2>
-    <form method="post">
+<style>
+    .create-article-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40%; /* Ширина форми */
+        background-color: #ff9100; /* Помаранчевий фон */
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Тінь */
+    }
+
+    .create-article-container h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #fff; /* Білий текст */
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+
+    .form-group {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .form-group ion-icon {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 10px 10px 10px 40px; /* Відступ для іконки */
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #fff; /* Білий текст */
+    }
+
+    .create-article-container form button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+    .create-article-container form button:hover {
+        background-color: #0056b3;
+    }
+
+    .create-article-container form button:active {
+        background-color: #003f7f;
+    }
+
+    .image-preview {
+        display: block;
+        margin: 10px auto;
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        cursor: pointer; /* Курсор для клікабельності */
+    }
+
+    /* Стилі для модального вікна */
+    .modal {
+        display: none; /* Приховано за замовчуванням */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Сірий прозорий фон */
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal img {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal.active {
+        display: flex; /* Показуємо модальне вікно */
+    }
+
+    .modal .close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: #fff;
+        color: #333;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal .close-btn:hover {
+        background-color: #f4f4f4;
+    }
+</style>
+
+<div class="create-article-container">
+    <h2>Create Article</h2>
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Зберегти</button>
+        <div class="form-group">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <label for="id_title">Title</label>
+            {{ form.title }}
+        </div>
+        <div class="form-group">
+            <ion-icon name="create-outline"></ion-icon>
+            <label for="id_content">Content</label>
+            {{ form.content }}
+        </div>
+        <div class="form-group">
+            <ion-icon name="image-outline"></ion-icon>
+            <label for="id_image">Image</label>
+            {{ form.image }}
+            <img id="imagePreview" class="image-preview" src="#" alt="Image Preview" style="display: none;">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+            <ion-icon name="save-outline"></ion-icon> Save
+        </button>
     </form>
 </div>
+
+<!-- Модальне вікно -->
+<div id="imageModal" class="modal">
+    <button class="close-btn" onclick="closeModal()">×</button>
+    <img id="modalImage" src="#" alt="Full Image">
+</div>
+
+<script>
+    const modal = document.getElementById('imageModal');
+    const preview = document.getElementById('imagePreview');
+    const modalImage = document.getElementById('modalImage');
+
+    document.getElementById('id_image').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                modalImage.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = '#';
+            modalImage.src = '#';
+            preview.style.display = 'none';
+        }
+    });
+
+    preview.addEventListener('click', function() {
+        modal.classList.add('active');
+    });
+
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+</script>
 {% endblock %}
