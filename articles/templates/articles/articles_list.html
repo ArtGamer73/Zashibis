@@ -186,13 +186,22 @@
             <div class="text-start mt-3">
               <small class="text-muted">Author: {{ article.author.username }}</small>
             </div>
-            <!-- Коментарі -->
-            <div class="comment-section">
-              <input type="text" placeholder="Write a comment..." />
-              <button type="button">
-                <ion-icon name="send-outline"></ion-icon>
-              </button>
+            <div id="comments-container">
+              {% for comment in article.comments.all %}
+                <div class="comment">
+                  <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
+                  <br><small>{{ comment.created_at }}</small>
+                </div>
+              {% empty %}
+                <p>No comments yet.</p>
+              {% endfor %}
             </div>
+              <div class="comment-section">
+                <input type="text" class="comment-input" placeholder="Write a comment..." />
+                <button type="button" class="send-comment" data-article-id="{{ article.id }}">
+                  <ion-icon name="send-outline"></ion-icon>
+                </button>
+              </div>
           </div>
         </div>
       </div>
@@ -222,6 +231,51 @@
     function closeModal() {
         modal.classList.remove('active');
     }
+    document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.send-comment');
+
+    buttons.forEach(button => {
+      button.addEventListener('click', function () {
+        const articleId = this.dataset.articleId;
+        const container = this.closest('.comment-section');
+        const input = container.querySelector('.comment-input');
+        const content = input.value.trim();
+        const commentsBox = container.closest('.card-body').querySelector('#comments-container');
+
+        if (!content) return;
+
+        fetch(`/article/${articleId}/comment/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: new URLSearchParams({ content })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'ok') {
+            const commentHTML = `
+              <div class="comment">
+                <strong>${data.username}</strong>: ${data.content}
+                <br><small>${data.created_at}</small>
+              </div>`;
+            commentsBox.insertAdjacentHTML('afterbegin', commentHTML);
+            input.value = '';
+          } else {
+            alert('Error: ' + JSON.stringify(data.errors));
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      });
+    });
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+  });
 </script>
 
 {% endblock %}

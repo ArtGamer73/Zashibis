@@ -4,7 +4,8 @@ from .forms import ArticleForm, CommentForm, PhotoForm
 from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 
 
 # Відображення списку стате
@@ -117,3 +118,22 @@ def like_article(request, pk):
 def article_list(request):
     articles = Article.objects.all().order_by('?')  # Випадковий порядок
     return render(request, 'articles/articles_list.html', {'articles': articles})
+
+
+@require_POST
+def post_comment(request, pk):
+    article = get_object_or_404(Article, pk=pk)
+    form = CommentForm(request.POST)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.article = article
+        comment.user = request.user
+        comment.save()
+        return JsonResponse({
+            'status': 'ok',
+            'username': request.user.username,
+            'content': comment.content,
+            'created_at': comment.created_at.strftime('%Y-%m-%d %H:%M')
+        })
+    else:
+        return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
