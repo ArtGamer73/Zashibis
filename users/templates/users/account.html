@@ -1,85 +1,136 @@
 {% extends "home/home.html" %}
+{% load static %}
 
 {% block content %}
 <style>
     body {
         background-color: #2e2e2e;
     }
-    .account-container {
-        margin-top: 100px;
-        max-width: 400px;
+
+    .profile-card {
+        margin: 100px auto;
         background-color: #ff9100;
+        max-width: 500px;
         padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    .account-container h2 {
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        color: white;
         text-align: center;
-        margin-bottom: 20px;
-        color: #fff;
     }
+
+    .profile-card img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 5px solid white;
+        margin-bottom: 20px;
+    }
+
+    .profile-card form {
+        margin-top: 20px;
+        text-align: left;
+    }
+
     .form-group {
-        position: relative;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
-    .form-group ion-icon {
-        position: absolute;
-        top: 50%;
-        left: 10px;
-        transform: translateY(-50%);
-        font-size: 1.2rem;
-        color: #333;
-    }
-    .form-group input {
-        width: 100%;
-        padding: 10px 10px 10px 40px; 
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-sizing: border-box;
-    }
+
     .form-group label {
+        font-weight: bold;
         display: block;
         margin-bottom: 5px;
-        font-weight: bold;
-        color: #fff;
     }
-    .form-group button {
+
+    .form-group input[type="text"],
+    .form-group input[type="email"] {
+        width: 100%;
+        padding: 8px;
+        border-radius: 8px;
+        border: none;
+    }
+
+    /* Скрыть оригинальный input */
+    input[type="file"] {
+        display: none;
+    }
+
+    .custom-file-upload {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #fff;
+        color: #333;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        border: 2px dashed #ccc;
+        transition: border-color 0.3s;
+    }
+
+    .custom-file-upload:hover {
+        border-color: #007bff;
+    }
+
+    #file-name {
+        margin-left: 10px;
+        font-weight: normal;
+        color: #555;
+        font-size: 14px;
+    }
+
+    .btn-save {
         background-color: #007bff;
         color: white;
+        padding: 10px 20px;
         border: none;
-        padding: 10px; 
-        border-radius: 5px;
-        cursor: pointer;
+        border-radius: 10px;
         font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
         width: 100%;
+        margin-top: 10px;
     }
-    .form-group button:hover {
+
+    .btn-save:hover {
         background-color: #0056b3;
     }
 </style>
 
-<div class="container d-flex justify-content-center">
-    <div class="account-container">
-        <h2>My Profile</h2>
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <ion-icon name="person-outline"></ion-icon>
-                <label for="id_username">Username</label>
-                {{ form.username }}
-            </div>
-            <div class="form-group">
-                <ion-icon name="mail-outline"></ion-icon>
-                <label for="id_email">Email</label>
-                {{ form.email }}
-            </div>
-            <div class="form-group">
-                <ion-icon name="image-outline"></ion-icon>
-                <label for="id_image">Profile Picture</label>
-                {{ form.image }}
-            </div>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-        </form>
-    </div>
+<div class="profile-card">
+    <img src="{{ request.user.profile.image.url }}" alt="Avatar">
+    <h2>{{ request.user.username }}</h2>
+    <p>{{ request.user.email }}</p>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_username">Username</label>
+            {{ user_form.username }}
+        </div>
+        <div class="form-group">
+            <label for="id_email">Email</label>
+            {{ user_form.email }}
+        </div>
+        <div class="form-group">
+            <label for="id_image">Change Profile Picture</label>
+           <label class="custom-file-upload" for="id_image">
+                <input type="file" name="image" id="id_image">
+                <span id="file-name">Choose a file</span>
+            </label>
+
+        </div>
+        <button class="btn-save" type="submit">Save Changes</button>
+    </form>
 </div>
+
+<script>
+    const input = document.getElementById('id_image');
+    const fileName = document.getElementById('file-name');
+
+    input.addEventListener('change', function () {
+        fileName.textContent = input.files[0]?.name || 'Choose a file';
+    });
+</script>
 {% endblock %}

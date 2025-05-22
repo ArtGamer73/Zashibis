@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Article, Comment, Like
 from .forms import ArticleForm, CommentForm, PhotoForm
+from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
@@ -29,40 +30,36 @@ def article_detail(request, pk):
 
 # Створення нової статті
 def create_article(request):
-    if request.method == 'POST':
-        form = ArticleForm(request.POST, request.FILES)  # Обробка request.FILES
+    if request.method == "POST":
+        form = ArticleForm(request.POST, request.FILES)
         if form.is_valid():
-            article = form.save(commit=False)
-            article.author = request.user
-            article.save()
-            messages.success(request, 'The article has been successfully created!')
-            return redirect('articles:article_list') 
-        else:
-            messages.error(request, 'An error occurred. Please check the data you entered.')
+            article = form.save(commit=False)  # Не зберігаємо одразу в базу
+            article.author = request.user  # Встановлюємо автора
+            article.save()  # Зберігаємо статтю
+            return redirect('articles:article_list')
     else:
         form = ArticleForm()
-    
     return render(request, 'articles/create_article.html', {'form': form})
 
-# Редагування статті
 def edit_article(request, pk):
     article = get_object_or_404(Article, pk=pk)
-    if request.method == 'POST':
-        form = ArticleForm(request.POST, request.FILES, instance=article)  # Обробка request.FILES
+    if request.user != article.author:
+        return HttpResponseForbidden("You are not allowed to edit this article.")
+    if request.method == "POST":
+        form = ArticleForm(request.POST, request.FILES, instance=article)
         if form.is_valid():
             form.save()
-            messages.success(request, 'The article has been successfully updated!')
             return redirect('articles:article_list')
-        else:
-            messages.error(request, 'An error occurred. Please check the data you entered.')
     else:
         form = ArticleForm(instance=article)
-    return render(request, 'articles/edit_article.html', {'form': form})
+    return render(request, 'articles/edit_article.html', {'form': form, 'article': article})
 
 # Видалення статті
 def delete_article(request, pk):
     article = get_object_or_404(Article, pk=pk)
-    if request.method == 'POST':
+    if request.user != article.author:
+        return HttpResponseForbidden("You are not allowed to delete this article.")
+    if request.method == "POST":
         article.delete()
         return redirect('articles:article_list')
     return render(request, 'articles/delete_article.html', {'article': article})
@@ -116,3 +113,7 @@ def like_article(request, pk):
             # Якщо лайк вже існує, видаляємо його (анлайк)
             like.delete()
     return redirect('articles:article_list')
+
+def article_list(request):
+    articles = Article.objects.all().order_by('?')  # Випадковий порядок
+    return render(request, 'articles/articles_list.html', {'articles': articles})

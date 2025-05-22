@@ -1,16 +1,89 @@
 {% extends "home/home.html" %}
 
 {% block content %}
-<div class="container mt-5">
-  <h1 class="text-center text-danger">Delete Article</h1>
-  <p class="text-center">Are you sure you want to delete the article "<strong>{{ article.title }}</strong>"?</p>
-  
-  <div class="text-center mt-4">
-    <form method="post">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-danger">Yes, delete</button>
+
+<style>
+  .center-container {
+    display: flex;
+    justify-content: flex-start; /* Вирівнювання по горизонталі */
+    align-items: center; /* Центрування по вертикалі */
+    height: calc(100vh - 56px); /* Висота екрану мінус висота navbar */
+    margin: 0;
+    padding-left: 10%; /* Зміщення вправо */
+  }
+
+  .delete-container {
+    padding: 3rem; /* Збільшено внутрішні відступи */
+    background-color: #ffffff;
+    border-radius: 15px; /* Більш округлені кути */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Більша тінь */
+    max-width: 500px; /* Збільшено максимальну ширину */
+    width: 100%;
+    text-align: center;
+  }
+
+  .delete-container h1 {
+    font-size: 2rem; /* Збільшено розмір заголовка */
+    color: #dc3545;
+    margin-bottom: 1.5rem;
+  }
+
+  .delete-container p {
+    font-size: 1.2rem; /* Збільшено розмір тексту */
+    color: #333;
+    margin-bottom: 2.5rem;
+  }
+
+  .delete-container .btn-danger {
+    background-color: #dc3545;
+    border: none;
+    padding: 12px 25px; /* Збільшено розмір кнопки */
+    font-size: 1.1rem; /* Збільшено розмір тексту кнопки */
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .delete-container .btn-danger:hover {
+    background-color: #a71d2a;
+  }
+
+  .delete-container .btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    padding: 12px 25px; /* Збільшено розмір кнопки */
+    font-size: 1.1rem; /* Збільшено розмір тексту кнопки */
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .delete-container .btn-secondary:hover {
+    background-color: #5a6268;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem; /* Збільшено відстань між кнопками */
+  }
+</style>
+
+<div class="center-container">
+  <div class="delete-container">
+    <h1>Delete Article</h1>
+    <p>Are you sure you want to delete the article "<strong>{{ article.title }}</strong>"?</p>
+    
+    <div class="button-group">
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, delete</button>
+      </form>
       <a href="{% url 'articles:article_list' %}" class="btn btn-secondary">Cancel</a>
-    </form>
+    </div>
   </div>
 </div>
+
 {% endblock %}
