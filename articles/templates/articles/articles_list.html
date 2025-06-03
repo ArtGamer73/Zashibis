@@ -3,6 +3,23 @@
 {% block content %}
 
 <style>
+  .topic-badge {
+    display: inline-block;
+    background: #e3f0ff;
+    color: #0056b3;
+    border-radius: 12px;
+    padding: 2px 12px;
+    font-size: 0.95em;
+    margin-bottom: 18px; /* Збільшено відступ знизу */
+    margin-right: 8px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    border: 1px solid #b6d4fe;
+    position: relative;
+    top: 0;
+    left: 0;
+  }
+
   .text-start {
     position: absolute;
     bottom: 10px;
@@ -48,37 +65,37 @@
 
   .delete-icon {
     position: absolute;
-    top: 10px; /* Розташовано у верхньому правому куті */
+    top: 10px;
     right: 10px;
-    background-color: transparent; /* Прозорий фон */
+    background-color: transparent;
     border: none;
-    color: #dc3545; /* Червоний колір для іконки */
+    color: #dc3545;
     font-size: 1.5rem;
     cursor: pointer;
   }
 
   .delete-icon:hover {
-    color: #a71d2a; /* Темніший червоний при наведенні */
+    color: #a71d2a;
   }
 
   .image-preview {
     display: block;
-    margin: 30px auto 10px auto; /* Зменшено верхній відступ до 30px */
+    margin: 30px auto 10px auto;
     max-width: 100%;
-    height: auto; /* Автоматична висота для збереження пропорцій */
+    height: auto;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    cursor: pointer; /* Курсор для клікабельності */
+    cursor: pointer;
   }
 
   .modal {
-    display: none; /* Приховано за замовчуванням */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Сірий прозорий фон */
+    background-color: rgba(0, 0, 0, 0.7);
     z-index: 1000;
     justify-content: center;
     align-items: center;
@@ -92,7 +109,7 @@
   }
 
   .modal.active {
-    display: flex; /* Показуємо модальне вікно */
+    display: flex;
   }
 
   .modal .close-btn {
@@ -124,9 +141,9 @@
 
   .comment-section input[type="text"] {
     width: 100%;
-    padding: 10px 50px 10px 15px; /* Відступ для кнопки літачка */
+    padding: 10px 50px 10px 15px;
     border: 1px solid #ccc;
-    border-radius: 25px; /* Округлені кути */
+    border-radius: 25px;
     box-sizing: border-box;
     background-color: #f8f9fa;
     color: #333;
@@ -155,6 +172,17 @@
 </style>
 
 <div class="container mt-5">  
+  <form method="get" class="mb-4">
+      <select name="topic" onchange="this.form.submit()" class="form-control" style="width:auto;display:inline-block;">
+          <option value="">Всі теми</option>
+          {% for topic in topics %}
+              <option value="{{ topic.id }}" {% if topic.id|stringformat:"s" == selected_topic %}selected{% endif %}>
+                  {{ topic.name }}
+              </option>
+          {% endfor %}
+      </select>
+      <noscript><button type="submit">Фільтрувати</button></noscript>
+  </form>
   <div class="row justify-content-center">
     {% for article in articles %}
       <div class="col-12 article-container mb-4">
@@ -168,21 +196,24 @@
               <img src="{{ article.image.url }}" alt="{{ article.title }}" class="image-preview" onclick="openModal('{{ article.image.url }}')">
           {% endif %}
           <div class="card-body">
+            {% if article.topic %}
+              <span class="topic-badge">{{ article.topic.name }}</span>
+            {% endif %}
             <h3 class="card-title">{{ article.title }}</h3>
             <h6 class="card-subtitle mb-2 text-muted">{{ article.published_date|date:"d M Y" }}</h6>
             <p class="card-text">{{ article.content|linebreaks }}</p>
             <div class="d-flex justify-content-between align-items-center">
-          {% if user.is_authenticated and user == article.author %}
-            <a href="{% url 'articles:edit_article' article.id %}" class="btn btn-warning btn-sm">Edit</a>
-          {% endif %}
-          <a href="{% url 'articles:like_article' article.id %}" class="btn btn-outline-primary btn-sm">
-            {% if user in article.likes.all %}
-              Unlike
-            {% else %}
-              Like
-            {% endif %}
-          </a>
-        </div>
+              {% if user.is_authenticated and user == article.author %}
+                <a href="{% url 'articles:edit_article' article.id %}" class="btn btn-warning btn-sm">Edit</a>
+              {% endif %}
+              <a href="{% url 'articles:like_article' article.id %}" class="btn btn-outline-primary btn-sm">
+                {% if user in article.likes.all %}
+                  Unlike
+                {% else %}
+                  Like
+                {% endif %}
+              </a>
+            </div>
             <div class="text-start mt-3">
               <small class="text-muted">Author: {{ article.author.username }}</small>
             </div>
@@ -196,12 +227,12 @@
                 <p>No comments yet.</p>
               {% endfor %}
             </div>
-              <div class="comment-section">
-                <input type="text" class="comment-input" placeholder="Write a comment..." />
-                <button type="button" class="send-comment" data-article-id="{{ article.id }}">
-                  <ion-icon name="send-outline"></ion-icon>
-                </button>
-              </div>
+            <div class="comment-section">
+              <input type="text" class="comment-input" placeholder="Write a comment..." />
+              <button type="button" class="send-comment" data-article-id="{{ article.id }}">
+                <ion-icon name="send-outline"></ion-icon>
+              </button>
+            </div>
           </div>
         </div>
       </div>

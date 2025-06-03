@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Article, Comment, Like
+from .models import Article, Comment, Like, Topic
 from .forms import ArticleForm, CommentForm, PhotoForm
 from django.http import HttpResponseForbidden
 from django.contrib import messages
@@ -7,12 +7,21 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 
-
 # Відображення списку стате
 @login_required
+@login_required
 def article_list(request):
-    articles = Article.objects.all().order_by('-published_date')
-    return render(request, 'articles/articles_list.html', {'articles': articles})
+    topic_id = request.GET.get('topic')
+    topics = Topic.objects.all()
+    if topic_id:
+        articles = Article.objects.filter(topic_id=topic_id).order_by('-published_date')
+    else:
+        articles = Article.objects.all().order_by('?')  # Випадковий порядок
+    return render(request, 'articles/articles_list.html', {
+        'articles': articles,
+        'topics': topics,
+        'selected_topic': topic_id
+    })
 
 def upload_photo(request):
     if request.method == 'POST':
@@ -31,16 +40,18 @@ def article_detail(request, pk):
 
 # Створення нової статті
 def create_article(request):
+    topics = Topic.objects.all()  # Додаємо отримання тем
     if request.method == "POST":
         form = ArticleForm(request.POST, request.FILES)
         if form.is_valid():
-            article = form.save(commit=False)  # Не зберігаємо одразу в базу
-            article.author = request.user  # Встановлюємо автора
-            article.save()  # Зберігаємо статтю
+            article = form.save(commit=False)
+            article.author = request.user
+            article.save()
             return redirect('articles:article_list')
     else:
         form = ArticleForm()
-    return render(request, 'articles/create_article.html', {'form': form})
+    return render(request, 'articles/create_article.html', {'form': form, 'topics': topics})
+
 
 def edit_article(request, pk):
     article = get_object_or_404(Article, pk=pk)
@@ -115,9 +126,9 @@ def like_article(request, pk):
             like.delete()
     return redirect('articles:article_list')
 
-def article_list(request):
-    articles = Article.objects.all().order_by('?')  # Випадковий порядок
-    return render(request, 'articles/articles_list.html', {'articles': articles})
+#def article_list(request):
+#    articles = Article.objects.all().order_by('?')  # Випадковий порядок
+#    return render(request, 'articles/articles_list.html', {'articles': articles})
 
 
 @require_POST
@@ -137,3 +148,34 @@ def post_comment(request, pk):
         })
     else:
         return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+
+#@login_required
+#class VotesView(View):
+#    model = None    # Модель данных - Статьи или Комментарии
+#    vote_type = None # Тип комментария Like/Dislike
+# 
+#    def post(self, request, pk):
+#        obj = self.model.objects.get(pk=pk)
+#        # GenericForeignKey не поддерживает метод get_or_create
+#        try:
+#            likedislike = LikeDislike.objects.get(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id, user=request.user)
+#            if likedislike.vote is not self.vote_type:
+#                likedislike.vote = self.vote_type
+#                likedislike.save(update_fields=['vote'])
+#                result = True
+#            else:
+#                likedislike.delete()
+#                result = False
+#        except LikeDislike.DoesNotExist:
+#            obj.votes.create(user=request.user, vote=self.vote_type)
+#            result = True
+# 
+#        return HttpResponse(
+#            json.dumps({
+#                "result": result,
+#                "like_count": obj.votes.likes().count(),
+#                "dislike_count": obj.votes.dislikes().count(),
+#                "sum_rating": obj.votes.sum_rating()
+#            }),
+#            content_type="application/json"
+#        )
