@@ -75,6 +75,14 @@ def delete_article(request, pk):
         article.delete()
         return redirect('articles:article_list')
     return render(request, 'articles/delete_article.html', {'article': article})
+
+@require_POST
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if request.user == comment.user:
+        comment.delete()
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'error'}, status=403)
 # Пошук статей
 def search_articles(request):
     query = request.GET.get('q')

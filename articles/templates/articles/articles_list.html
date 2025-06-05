@@ -10,7 +10,7 @@
     border-radius: 12px;
     padding: 2px 12px;
     font-size: 0.95em;
-    margin-bottom: 18px; /* Збільшено відступ знизу */
+    margin-bottom: 18px;
     margin-right: 8px;
     font-weight: 500;
     letter-spacing: 0.03em;
@@ -59,7 +59,7 @@
   }
 
   .article-card:hover {
-    transform: scale(1.02); /* Slight zoom on hover */
+    transform: scale(1.02);
     transition: transform 0.2s ease-in-out;
   }
 
@@ -169,6 +169,70 @@
   .comment-section button:hover {
     color: #0056b3;
   }
+
+  .comments-container {
+    background: #f5f6fa;
+    border-radius: 10px;
+    padding: 15px 18px 10px 18px;
+    margin-top: 18px;
+    margin-bottom: 10px;
+  }
+
+  .comment {
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e0e0e0;
+    position: relative;
+    padding-right: 36px;
+  }
+
+  .comment:last-child {
+    border-bottom: none;
+  }
+
+  .delete-comment-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: #dc3545;
+    font-size: 1.3em;
+    cursor: pointer;
+    padding: 0;
+    z-index: 2;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+
+  .delete-comment-btn:hover {
+    color: #a71d2a;
+  }
+
+  .d-none {
+    display: none !important;
+  }
+
+  .show-more-comments {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 8px;
+    background: #e3f0ff;
+    border: none;
+    border-radius: 6px;
+    color: #0056b3;
+    font-weight: 500;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .show-more-comments:hover {
+    background: #b6d4fe;
+    color: #003366;
+    text-decoration: none;
+  }
 </style>
 
 <div class="container mt-5">  
@@ -217,15 +281,23 @@
             <div class="text-start mt-3">
               <small class="text-muted">Author: {{ article.author.username }}</small>
             </div>
-            <div id="comments-container">
+            <div id="comments-container" class="comments-container">
               {% for comment in article.comments.all %}
-                <div class="comment">
+                <div class="comment{% if forloop.counter > 2 %} d-none extra-comment{% endif %}" data-comment-id="{{ comment.id }}">
+                  {% if user == comment.user %}
+                    <button class="delete-comment-btn" data-comment-id="{{ comment.id }}" title="Видалити коментар">
+                      <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                  {% endif %}
                   <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
                   <br><small>{{ comment.created_at }}</small>
                 </div>
               {% empty %}
                 <p>No comments yet.</p>
               {% endfor %}
+              {% if article.comments.count > 2 %}
+                <button class="show-more-comments" type="button">Читати далі</button>
+              {% endif %}
             </div>
             <div class="comment-section">
               <input type="text" class="comment-input" placeholder="Write a comment..." />
@@ -262,51 +334,131 @@
     function closeModal() {
         modal.classList.remove('active');
     }
+
     document.addEventListener('DOMContentLoaded', function () {
-    const buttons = document.querySelectorAll('.send-comment');
+      // Додавання коментаря
+      const buttons = document.querySelectorAll('.send-comment');
+      buttons.forEach(button => {
+        button.addEventListener('click', function () {
+          const articleId = this.dataset.articleId;
+          const container = this.closest('.comment-section');
+          const input = container.querySelector('.comment-input');
+          const content = input.value.trim();
+          const commentsBox = container.closest('.card-body').querySelector('#comments-container');
 
-    buttons.forEach(button => {
-      button.addEventListener('click', function () {
-        const articleId = this.dataset.articleId;
-        const container = this.closest('.comment-section');
-        const input = container.querySelector('.comment-input');
-        const content = input.value.trim();
-        const commentsBox = container.closest('.card-body').querySelector('#comments-container');
+          if (!content) return;
 
-        if (!content) return;
-
-        fetch(`/article/${articleId}/comment/`, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: new URLSearchParams({ content })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === 'ok') {
-            const commentHTML = `
-              <div class="comment">
-                <strong>${data.username}</strong>: ${data.content}
-                <br><small>${data.created_at}</small>
-              </div>`;
-            commentsBox.insertAdjacentHTML('afterbegin', commentHTML);
-            input.value = '';
-          } else {
-            alert('Error: ' + JSON.stringify(data.errors));
-          }
-        })
-        .catch(error => console.error('Error:', error));
+          fetch(`/article/${articleId}/comment/`, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': getCookie('csrftoken'),
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ content })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === 'ok') {
+              const commentHTML = `
+                <div class="comment d-none extra-comment" data-comment-id="${data.comment_id}">
+                  <button class="delete-comment-btn" data-comment-id="${data.comment_id}" title="Видалити коментар">
+                    <ion-icon name="trash-outline"></ion-icon>
+                  </button>
+                  <strong>${data.username}</strong>: ${data.content}
+                  <br><small>${data.created_at}</small>
+                </div>`;
+              const visibleComments = commentsBox.querySelectorAll('.comment:not(.d-none)').length;
+              if (visibleComments < 2) {
+                commentsBox.insertAdjacentHTML('afterbegin', commentHTML.replace('d-none extra-comment', ''));
+              } else {
+                commentsBox.insertAdjacentHTML('beforeend', commentHTML);
+                let showMoreBtn = commentsBox.querySelector('.show-more-comments');
+                if (!showMoreBtn) {
+                  showMoreBtn = document.createElement('button');
+                  showMoreBtn.className = 'show-more-comments';
+                  showMoreBtn.type = 'button';
+                  showMoreBtn.textContent = 'Читати далі';
+                  commentsBox.appendChild(showMoreBtn);
+                  showMoreBtn.addEventListener('click', function() {
+                    const hidden = Array.from(commentsBox.querySelectorAll('.extra-comment.d-none'));
+                    hidden.slice(0, 2).forEach(el => el.classList.remove('d-none'));
+                    if (commentsBox.querySelectorAll('.extra-comment.d-none').length === 0) {
+                      showMoreBtn.style.display = 'none';
+                    }
+                  });
+                }
+              }
+              input.value = '';
+            } else {
+              alert('Error: ' + JSON.stringify(data.errors));
+            }
+          })
+          .catch(error => console.error('Error:', error));
+        });
       });
-    });
 
-    function getCookie(name) {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-  });
+      // Видалення коментаря
+      document.querySelectorAll('.comments-container').forEach(container => {
+        container.addEventListener('click', function(e) {
+          if (e.target.classList.contains('delete-comment-btn') || e.target.closest('.delete-comment-btn')) {
+            const btn = e.target.closest('.delete-comment-btn');
+            const commentId = btn.dataset.commentId;
+            if (confirm('Видалити цей коментар?')) {
+              fetch(`/comment/${commentId}/delete/`, {
+                method: 'POST',
+                headers: {
+                  'X-CSRFToken': getCookie('csrftoken'),
+                }
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.status === 'ok') {
+                  btn.closest('.comment').remove();
+                  // Показати кнопку "Читати далі", якщо ще є приховані коментарі
+                  const commentsBox = btn.closest('.comments-container');
+                  const extra = commentsBox.querySelectorAll('.extra-comment.d-none');
+                  let showMoreBtn = commentsBox.querySelector('.show-more-comments');
+                  if (extra.length > 0 && !showMoreBtn) {
+                    showMoreBtn = document.createElement('button');
+                    showMoreBtn.className = 'show-more-comments';
+                    showMoreBtn.type = 'button';
+                    showMoreBtn.textContent = 'Читати далі';
+                    commentsBox.appendChild(showMoreBtn);
+                    showMoreBtn.addEventListener('click', function() {
+                      const hidden = Array.from(commentsBox.querySelectorAll('.extra-comment.d-none'));
+                      hidden.slice(0, 2).forEach(el => el.classList.remove('d-none'));
+                      if (commentsBox.querySelectorAll('.extra-comment.d-none').length === 0) {
+                        showMoreBtn.style.display = 'none';
+                      }
+                    });
+                  }
+                } else {
+                  alert('Помилка видалення');
+                }
+              });
+            }
+          }
+        });
+
+        // Показати по 2 коментаря по кліку "читати далі"
+        const showMoreBtn = container.querySelector('.show-more-comments');
+        if (showMoreBtn) {
+          showMoreBtn.addEventListener('click', function() {
+            const hidden = Array.from(container.querySelectorAll('.extra-comment.d-none'));
+            hidden.slice(0, 2).forEach(el => el.classList.remove('d-none'));
+            if (container.querySelectorAll('.extra-comment.d-none').length === 0) {
+              showMoreBtn.style.display = 'none';
+            }
+          });
+        }
+      });
+
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      }
+    });
 </script>
 
 {% endblock %}

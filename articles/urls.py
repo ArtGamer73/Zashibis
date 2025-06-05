@@ -11,6 +11,7 @@ urlpatterns = [
     path('edit/<int:pk>/', views.edit_article, name='edit_article'),  # Редагування статті
     path('delete/<int:pk>/', views.delete_article, name='delete_article'),  # Видалення статті
     path('search/', views.search_articles, name='search_articles'),  # Пошук статей
+    path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),  # Видалення коментаря
     path('article/<int:pk>/like/', views.like_article, name='like_article'),  # Лайк статті
     path('article/<int:pk>/comment/', views.post_comment, name='post_comment'), # Коментування статті
 ]
